@@ -154,6 +154,8 @@ gulp.task('scripts-vendor', () =>
     './app/scripts/vendor/idb.js',
     './app/scripts/templates.js',
     './app/scripts/vendor/jquery.js',
+    './app/scripts/vendor/jquery-migrate.js',
+    './app/scripts/vendor/require.js',
     './app/scripts/vendor/underscore.js',
     './app/scripts/vendor/backbone.js',
     './app/scripts/vendor/materialize.js',
