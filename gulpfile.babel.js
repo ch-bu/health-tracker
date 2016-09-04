@@ -16,6 +16,9 @@ import declare from 'gulp-declare';
 import concat from 'gulp-concat';
 import mainBowerFiles from 'main-bower-files';
 import filter from 'gulp-filter';
+import requirejsOptimize from 'gulp-requirejs-optimize';
+import requireConvert from 'gulp-require-convert';
+import rjs from 'gulp-requirejs';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -34,6 +37,7 @@ gulp.task('bower-files', () => {
   // Pipe js files to vendor directory
   gulp.src(mainBower)
     .pipe(jsFiles)
+    // .pipe(requireConvert())
     .pipe(gulp.dest('app/scripts/vendor'));
 });
 
@@ -155,9 +159,9 @@ gulp.task('scripts-vendor', () =>
     './app/scripts/templates.js',
     './app/scripts/vendor/jquery.js',
     './app/scripts/vendor/jquery-migrate.js',
-    './app/scripts/vendor/require.js',
     './app/scripts/vendor/underscore.js',
     './app/scripts/vendor/backbone.js',
+    // './app/scripts/vendor/require.js',
     './app/scripts/vendor/materialize.js',
     './app/scripts/vendor/d3.js',
   ])
@@ -175,15 +179,24 @@ gulp.task('scripts-vendor', () =>
 );
 
 /**
+ * Optimize requirejs
+ */
+gulp.task('requirejs', () => {
+  return gulp.src('app/scripts/app/views/main.js')
+    .pipe(requirejsOptimize())
+    .pipe(gulp.dest('.tmp/scripts'));
+});
+
+/**
  * Minify main.js
  */
 gulp.task('scripts-app', () => {
   gulp.src([
-    './app/scripts/app/views/main.js',
-    './app/scripts/app/app.js',
+    'app/scripts/app/views/main.js',
+    'app/scripts/app/app.js',
   ])
   .pipe($.newer('.tmp/scripts'))
-  .pipe($.newer('.dist/scripts'))
+  .pipe($.newer('dist/scripts'))
   .pipe($.sourcemaps.init())
   .pipe($.babel())
   .pipe($.sourcemaps.write())
@@ -230,7 +243,7 @@ gulp.task('clean', () => del(['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 /**
  * Watch files for changes & reload
  */
-gulp.task('serve', ['scripts-vendor', 'scripts-app', 'styles'], () => {
+gulp.task('serve', ['styles'], () => {
   browserSync({
     notify: false,
     // Customize the Browsersync console logging prefix
@@ -300,3 +313,28 @@ gulp.task('default', ['clean'], cb =>
     cb
   )
 );
+
+/**
+ * R.js javascript files
+ */
+ gulp.task('requirejsBuild', () => {
+  rjs({
+    baseUrl: 'app/scripts',
+    dir: '.tmp/scripts',
+    // mainConfigFile: 'app/scripts/main.js',
+    // out: 'test.js',
+
+    modules: [
+      {
+        name: 'common',
+
+        include: [
+          'vendor/jquery',
+          'vendor/d3'
+        ]
+      }
+    ],
+
+    optimize: 'uglify2'
+  });
+ });

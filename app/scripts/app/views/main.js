@@ -1,11 +1,18 @@
-var app = app || {};
+define(['backbone', 'app/models/model'], function(Backbone, Model) {
 
-app.AppView = Backbone.View.extend({
+  var AppView = Backbone.View.extend({
 
-  el: '.container',
+    el: '.container',
 
-  initialize: function() {
-    console.log('initalize app');
-  }
+    initialize: function() {
+      console.log('initalize app');
+      var model = new Model();
+    }
+
+  });
+
+  return AppView;
 
 });
+
+
