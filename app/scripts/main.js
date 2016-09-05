@@ -21,11 +21,11 @@ require.config({
     jquery: 'vendor/jquery',
     backbone: 'vendor/backbone',
     d3: 'vendor/d3',
-    mainView: 'app/views/main'
+    mainView: 'app/views/main',
   },
 });
 
 
-require(['backbone', 'app/views/main'], function(Backbone, AppView) {
+require(['backbone', 'mainView'], function(Backbone, AppView) {
   new AppView();
 });

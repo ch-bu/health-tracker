@@ -1,9 +1,11 @@
-define(['backbone'], function(Backbone) {
-  var Model = Backbone.Model.extend({
+define(['underscore', 'backbone'], function(_, Backbone) {
+
+  var SearchModel = Backbone.Model.extend({
+
     initialize: function() {
-      console.log('model');
+      console.log('serachmodel');
     }
   });
 
-  return Model;
+  return SearchModel;
 });
