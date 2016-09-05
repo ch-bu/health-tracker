@@ -1,4 +1,5 @@
-define(['backbone', 'app/models/model'], function(Backbone, Model) {
+define(['backbone', 'app/models/food-model',
+  'app/collections/food-collection'], function(Backbone, FoodModel, FoodCollection) {
 
   var AppView = Backbone.View.extend({
 
@@ -6,7 +7,9 @@ define(['backbone', 'app/models/model'], function(Backbone, Model) {
 
     initialize: function() {
       console.log('initalize app');
-      var model = new Model();
+      var model = new FoodModel();
+      var foodCollection = new FoodCollection();
+      console.log(foodCollection);
     }
 
   });
