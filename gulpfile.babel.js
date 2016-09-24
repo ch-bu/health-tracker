@@ -37,7 +37,6 @@ gulp.task('bower-files', () => {
   // Pipe js files to vendor directory
   gulp.src(mainBower)
     .pipe(jsFiles)
-    // .pipe(requireConvert())
     .pipe(gulp.dest('app/scripts/vendor'));
 });
 
@@ -65,6 +64,7 @@ gulp.task('templates', () => {
       noRedeclare: true,
     }))
     .pipe(concat('templates.js'))
+    .pipe(requireConvert())
     .pipe(gulp.dest('app/scripts/', {overwrite: true}));
 });
 

@@ -1,10 +1,11 @@
-define(['underscore', 'backbone', 'app/models/food-model'],
+define(['underscore', 'backbone', 'foodModel'],
   function(_, Backbone, FoodModel) {
 
   var FoodCollection = Backbone.Collection.extend({
 
+    model: FoodModel,
+
     initialize: function() {
-      console.log('food collection');
     },
 
     apiUrl: function() {
@@ -12,7 +13,7 @@ define(['underscore', 'backbone', 'app/models/food-model'],
     },
 
     parse: function(response) {
-      return response.fields;
+      return response.hits;
     }
   });
 

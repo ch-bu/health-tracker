@@ -6,6 +6,18 @@
 require.config({
   baseUrl: 'scripts',
 
+  paths: {
+    underscore: 'vendor/underscore',
+    jquery: 'vendor/jquery',
+    backbone: 'vendor/backbone',
+    d3: 'vendor/d3',
+    handlebars: 'vendor/handlebars',
+    mainView: 'app/views/main',
+    templates: 'templates',
+    foodCollection: 'app/collections/food-collection',
+    foodModel: 'app/models/food-model',
+  },
+
   shim: {
     underscore: {
       exports: '_'
@@ -14,15 +26,7 @@ require.config({
       deps: ['underscore', 'jquery'],
       exports: 'Backbone'
     }
-  },
-
-  paths: {
-    underscore: 'vendor/underscore',
-    jquery: 'vendor/jquery',
-    backbone: 'vendor/backbone',
-    d3: 'vendor/d3',
-    mainView: 'app/views/main',
-  },
+  }
 });
 
 
