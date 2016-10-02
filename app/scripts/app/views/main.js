@@ -7,7 +7,7 @@ define(['backbone', 'd3', 'foodModel',
     el: 'main',
 
     events: {
-      'keyup #food-search': 'searchFood',
+      'click #food-search-button': 'searchFood',
     },
 
     initialize: function() {
@@ -34,7 +34,7 @@ define(['backbone', 'd3', 'foodModel',
       // Search food
       this.foodCollection.fetch({
         // Add parameters to api request
-        data: $.param({results: '0:10', appId: '14f78fa8',
+        data: $.param({results: '0:5', appId: '14f78fa8',
           fields: 'item_name,brand_name,item_description,nf_serving_weight_grams,nf_calories,nf_total_fat,nf_total_carbohydrate,nf_protein,nf_sugars',
           appKey: '05fb77c91338716322dfed86dc63eabc'}),
 
