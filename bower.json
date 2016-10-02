@@ -16,6 +16,7 @@
     "materialize": "^0.97.7",
     "d3": "^4.2.2",
     "requirejs": "^2.2.0",
-    "jquery-migrate": "^3.0.0"
+    "jquery-migrate": "^3.0.0",
+    "moment": "^2.15.1"
   }
 }

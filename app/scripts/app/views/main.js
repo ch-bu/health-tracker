@@ -1,6 +1,6 @@
 define(['backbone', 'd3', 'foodModel',
-  'foodCollection', 'templates'],
-  function(Backbone, d3, FoodModel, FoodCollection, Handlebars) {
+  'foodCollection', 'templates', 'moment'],
+  function(Backbone, d3, FoodModel, FoodCollection, Handlebars, moment) {
 
   var AppView = Backbone.View.extend({
 
@@ -14,6 +14,10 @@ define(['backbone', 'd3', 'foodModel',
       // Init models and collections
       this.foodModel = new FoodModel();
       this.foodCollection = new FoodCollection();
+
+      $(window).bind('storage', function (e) {
+        console.log(e.originalEvent.key, e.originalEvent.newValue);
+      });
     },
 
     /**
@@ -66,7 +70,7 @@ define(['backbone', 'd3', 'foodModel',
         }));
 
       // Interpolate between green and red
-      var interpolationGreenRed = d3.interpolate("#A1C763", "#D7756B");
+      var interpolationGreenRed = d3.interpolate("#26a69a", "#D7756B");
 
       // Add food items to search
       d3.select('#food-list')
@@ -89,7 +93,50 @@ define(['backbone', 'd3', 'foodModel',
      * this day
      */
     foodSelected: function(food) {
-      console.log(food);
+      ////////////////////////////////
+      // Store food in localstorage //
+      ////////////////////////////////
+
+      // Get today's date
+      var date = moment().format("YYYY-MM-DD");
+
+      // Add id to storedFood
+      food.foodId = "food_" + Math.floor((Math.random() * 1e+20) + 1);
+
+      // Add date added to storedFood
+      food.dateAdded = date;
+
+      // Turn localStorage to JSON object
+      var storedFood = JSON.parse(localStorage.getItem('myFoods'));
+
+      // Push new food to stored foods
+      storedFood.push(food);
+
+      // Update local storage for specific date
+      localStorage.myFoods = JSON.stringify(storedFood);
+
+      // console.log(localStorage.myFoods);
+
+      // console.log($.grep(res, function(e){ return e.foodId == "food_76008160937926520000"; }));
+      // console.log($.grep(res, function(e){ return e.dateAdded == "2016-10-02"; }));
+
+      //////////////////////////////////
+      // Add food to foodTracker list //
+      //////////////////////////////////
+
+      // Get trackedFood
+      var trackedFood = JSON.parse(localStorage.getItem('foodTracker'));
+
+      // Check if food for this day exists and add calories
+      if (trackedFood[date] === null) {
+        trackedFood[date] = food.nf_calories;
+      }
+
+      // Add calories to current day
+      trackedFood[date] = trackedFood[date] + food.nf_calories;
+
+      // Save added calories for this day
+      localStorage.setItem('foodTracker', JSON.stringify(trackedFood));
     }
 
   });

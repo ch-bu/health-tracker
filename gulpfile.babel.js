@@ -161,6 +161,7 @@ gulp.task('scripts-vendor', () =>
     './app/scripts/vendor/jquery-migrate.js',
     './app/scripts/vendor/underscore.js',
     './app/scripts/vendor/backbone.js',
+    './app/scripts/vendor/moment.js',
     // './app/scripts/vendor/require.js',
     './app/scripts/vendor/materialize.js',
     './app/scripts/vendor/d3.js',

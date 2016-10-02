@@ -12,6 +12,8 @@ require.config({
     backbone: 'vendor/backbone',
     d3: 'vendor/d3',
     handlebars: 'vendor/handlebars',
+    idb: 'vendor/idb',
+    moment: 'vendor/moment',
     mainView: 'app/views/main',
     templates: 'templates',
     foodCollection: 'app/collections/food-collection',
@@ -32,4 +34,14 @@ require.config({
 
 require(['backbone', 'mainView'], function(Backbone, AppView) {
   new AppView();
+
+  // Set myFoods storage if non-existent
+  if (localStorage.getItem('myFoods') === null) {
+    localStorage.setItem('myFoods', '[]');
+  }
+
+  // Set date storage of food if not existent
+  if (localStorage.getItem('foodTracker') === null) {
+    localStorage.setItem('foodTracker', '{}');
+  }
 });
