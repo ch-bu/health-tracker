@@ -1,12 +1,29 @@
-#food-list {
+main {
+
+  h2 {
+    text-align: center;
+  }
+
+  height: 100vh;
+
+  #food-list {
   li {
     padding: 5px;
     cursor: pointer;
     margin: 2px;
+    transition: opacity 0.5s ease;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
   }
-}
 
 
-main {
-  height: 100vh;
+  #previous-day, #next-day {
+    position: absolute;
+    top: 50%;
+    cursor: pointer;
+  }
+
 }

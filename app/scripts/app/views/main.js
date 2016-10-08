@@ -18,6 +18,9 @@ define(['backbone', 'd3', 'foodModel',
       $(window).bind('storage', function (e) {
         console.log(e.originalEvent.key, e.originalEvent.newValue);
       });
+
+      // Add current date to heading
+      $('#today').html(moment().format("MMMM DD YYYY"));
     },
 
     /**
@@ -34,6 +37,10 @@ define(['backbone', 'd3', 'foodModel',
 
       // Append food to api url
       this.foodCollection.url = this.foodCollection.apiUrl() + food;
+
+      // Replace button with loading template
+      $('#food-search-button').replaceWith(
+        MyApp.templates['loading-ring']());
 
       // Search food
       this.foodCollection.fetch({
@@ -57,6 +64,10 @@ define(['backbone', 'd3', 'foodModel',
      * user is looking for
      */
     renderSearch: function() {
+      // Remove loading ring
+      $('#loading-ring').replaceWith(
+        MyApp.templates['food-search-button']());
+
       // Get data
       var data = this.foodCollection.toJSON();
 
@@ -137,6 +148,8 @@ define(['backbone', 'd3', 'foodModel',
 
       // Save added calories for this day
       localStorage.setItem('foodTracker', JSON.stringify(trackedFood));
+
+      console.log(localStorage.getItem('foodTracker'));
     }
 
   });
