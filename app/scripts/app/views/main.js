@@ -15,12 +15,19 @@ define(['backbone', 'd3', 'foodModel',
       this.foodModel = new FoodModel();
       this.foodCollection = new FoodCollection();
 
-      $(window).bind('storage', function (e) {
-        console.log(e.originalEvent.key, e.originalEvent.newValue);
-      });
+      // Init date for data
+      this.currDate = moment().format("YYYY-MM-DD");
+      console.log(this.currDate);
+
+      // $(window).bind('storage', function (e) {
+      //   console.log(e.originalEvent.key, e.originalEvent.newValue);
+      // });
 
       // Add current date to heading
       $('#today').html(moment().format("MMMM DD YYYY"));
+
+      // Init foodView
+      this.foodView = new FoodView();
     },
 
     /**
@@ -96,7 +103,6 @@ define(['backbone', 'd3', 'foodModel',
           return interpolationGreenRed(colorScale(d.nf_calories));
         })
         .on('click', this.foodSelected);
-
     },
 
     /**
@@ -149,9 +155,21 @@ define(['backbone', 'd3', 'foodModel',
       // Save added calories for this day
       localStorage.setItem('foodTracker', JSON.stringify(trackedFood));
 
-      console.log(localStorage.getItem('foodTracker'));
+      console.log(this.currDate);
+
+      // Get foods for current day
+      var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
+      var foods = $.grep(foods, function(e){ return e.dateAdded == "2016-10-02"; });
     }
 
+  });
+
+  var FoodView = Backbone.View.extend({
+    el: '#foods',
+
+    initialize: function() {
+
+    }
   });
 
   return AppView;
