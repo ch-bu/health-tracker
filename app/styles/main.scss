@@ -25,4 +25,18 @@ main {
     cursor: pointer;
   }
 
+  table {
+    // border: 1px solid #ccc;
+    // padding: 6px;
+
+    i {
+      cursor: pointer;
+      color: #26a69a;
+    }
+
+    td {
+      padding: 10px 5px 10px 10px;
+    }
+  }
+
 }

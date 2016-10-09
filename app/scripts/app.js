@@ -33,7 +33,6 @@ require.config({
 
 
 require(['backbone', 'mainView'], function(Backbone, AppView) {
-  new AppView();
 
   // Set myFoods storage if non-existent
   if (localStorage.getItem('myFoods') === null) {
@@ -44,4 +43,14 @@ require(['backbone', 'mainView'], function(Backbone, AppView) {
   if (localStorage.getItem('foodTracker') === null) {
     localStorage.setItem('foodTracker', '{}');
   }
+
+
+  new AppView();
+
+  // Array Remove - By John Resig (MIT Licensed)
+  Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+  };
 });

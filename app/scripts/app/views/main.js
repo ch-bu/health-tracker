@@ -130,7 +130,7 @@ define(['backbone', 'd3', 'foodModel',
       ////////////////////////////////
 
       // Get today's date
-      var date = moment().format("YYYY-MM-DD");
+      var date = this.currDate.format("YYYY-MM-DD");
 
       // Add id to storedFood
       food.foodId = "food_" + Math.floor((Math.random() * 1e+20) + 1);
@@ -176,6 +176,11 @@ define(['backbone', 'd3', 'foodModel',
   var FoodView = Backbone.View.extend({
     el: '#food-display',
 
+    events: {
+      'click table i': 'deleteItem',
+      'click table': 'renderList',
+    },
+
     /**
      * Render all food data for view
      * @return {null}
@@ -193,6 +198,7 @@ define(['backbone', 'd3', 'foodModel',
 
       // Render food list where items can be deleted
       this.renderList();
+      console.log(this);
     },
 
     /**
@@ -223,9 +229,39 @@ define(['backbone', 'd3', 'foodModel',
       return foods;
     },
 
+    /**
+     * Render list of all items
+     * @return {null}
+     */
     renderList: function() {
-      console.log(this.foods);
-    }
+      var self = this;
+
+      // Grab div
+      var foodList = $('#food-items');
+
+      // Change inner html
+      foodList.html(MyApp.templates['food-list']({item: self.foods}));
+    },
+
+    // Delete selected item from list
+    deleteItem: function(item) {
+      // Get id from item
+      var id = item.currentTarget.id;
+
+      // Remove item from localStorage
+      var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
+
+      // Filter array
+      var newArray = foodStorage.filter(function(item) {
+        // All foods that do not match item id
+        if (item.foodId !== id) {
+          return item;
+        }
+      });
+
+      // Update local storage for specific date
+      localStorage.myFoods = JSON.stringify(newArray);
+    },
   });
 
   return AppView;
