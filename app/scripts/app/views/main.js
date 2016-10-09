@@ -8,30 +8,41 @@ define(['backbone', 'd3', 'foodModel',
 
     events: {
       'click #food-search-button': 'searchFood',
+      'click #previous-day': 'previousDay',
+      'click #next-day': 'nextDay',
     },
 
     initialize: function() {
       // Init models and collections
       this.foodModel = new FoodModel();
       this.foodCollection = new FoodCollection();
+      this.foodView = new FoodView();
 
       // Init date for data
-      this.currDate = moment().format("YYYY-MM-DD");
-      console.log(this.currDate);
+      this.currDate = moment();
 
-      // $(window).bind('storage', function (e) {
-      //   console.log(e.originalEvent.key, e.originalEvent.newValue);
-      // });
+      // Render food
+      this.foodView.renderFoods(this.currDate);
 
       // Add current date to heading
       $('#today').html(moment().format("MMMM DD YYYY"));
+    },
 
-      // Init foodView
-      this.foodView = new FoodView();
+    // Set curr day to day before current day
+    previousDay: function() {
+      this.currDate.subtract(1, "days");
+      this.foodView.renderFoods(this.currDate);
+    },
+
+    // Add a day to current day
+    nextDay: function() {
+      this.currDate.add(1, "days");
+      this.foodView.renderFoods(this.currDate);
     },
 
     /**
-     * Search for food when user types
+     * Search for food when user pushes
+     * search button
      */
     searchFood: function() {
       var self = this;
@@ -71,6 +82,8 @@ define(['backbone', 'd3', 'foodModel',
      * user is looking for
      */
     renderSearch: function() {
+      var self = this;
+
       // Remove loading ring
       $('#loading-ring').replaceWith(
         MyApp.templates['food-search-button']());
@@ -102,14 +115,16 @@ define(['backbone', 'd3', 'foodModel',
         .style('background-color', function(d) {
           return interpolationGreenRed(colorScale(d.nf_calories));
         })
-        .on('click', this.foodSelected);
+        .on('click', function(food, day) {
+          self.foodSelected(food, self);
+        });
     },
 
     /**
      * Add selected food to database for
      * this day
      */
-    foodSelected: function(food) {
+    foodSelected: function(food, self) {
       ////////////////////////////////
       // Store food in localstorage //
       ////////////////////////////////
@@ -132,11 +147,6 @@ define(['backbone', 'd3', 'foodModel',
       // Update local storage for specific date
       localStorage.myFoods = JSON.stringify(storedFood);
 
-      // console.log(localStorage.myFoods);
-
-      // console.log($.grep(res, function(e){ return e.foodId == "food_76008160937926520000"; }));
-      // console.log($.grep(res, function(e){ return e.dateAdded == "2016-10-02"; }));
-
       //////////////////////////////////
       // Add food to foodTracker list //
       //////////////////////////////////
@@ -155,20 +165,66 @@ define(['backbone', 'd3', 'foodModel',
       // Save added calories for this day
       localStorage.setItem('foodTracker', JSON.stringify(trackedFood));
 
-      console.log(this.currDate);
+      // Render foods with added item
+      self.foodView.renderFoods(self.currDate);
+    },
 
-      // Get foods for current day
-      var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
-      var foods = $.grep(foods, function(e){ return e.dateAdded == "2016-10-02"; });
-    }
+
 
   });
 
   var FoodView = Backbone.View.extend({
-    el: '#foods',
+    el: '#food-display',
 
-    initialize: function() {
+    /**
+     * Render all food data for view
+     * @return {null}
+     */
+    renderFoods: function(day) {
+      // Save day variables in foodView scope
+      this.dayFormatted = day.format("YYYY-MM-DD");
+      this.day = day;
 
+      // Get all foods for current date
+      this.foods = this.getFoodsCurrDate(this.dayFormatted);
+
+      // Change heading
+      this.changeHeading();
+
+      // Render food list where items can be deleted
+      this.renderList();
+    },
+
+    /**
+     * Change date in heading
+     * @return {null}
+     */
+    changeHeading: function() {
+      // Grab heading
+      var heading = $('#today');
+
+      // Change html of heading
+      heading.html(this.day.format("MMMM DD YYYY"));
+    },
+
+    /**
+     * Get list of foods for a
+     * specific day
+     * @param  {Object} day     moment object of date
+     * @return {Object} foods   List of foods
+     */
+    getFoodsCurrDate: function(day) {
+      // Read data from local storage
+      var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
+
+      // Grep items for specific day
+      var foods = $.grep(foodStorage, function(e){ return e.dateAdded == day; });
+
+      return foods;
+    },
+
+    renderList: function() {
+      console.log(this.foods);
     }
   });
 
