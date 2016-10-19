@@ -168,13 +168,15 @@ define(['backbone', 'd3', 'foodModel',
       // Render foods with added item
       self.foodView.renderFoods(self.currDate);
     },
-
-
-
   });
 
   var FoodView = Backbone.View.extend({
     el: '#food-display',
+
+    initialize: function() {
+      // Draw line Chart
+      // this.drawLineChart();
+    },
 
     events: {
       'click table i': 'deleteItem',
@@ -198,7 +200,106 @@ define(['backbone', 'd3', 'foodModel',
 
       // Render food list where items can be deleted
       this.renderList();
-      console.log(this);
+
+      // Draw line Chart
+      this.drawLineChart();
+    },
+
+    /**
+     * Draw line chart that display's
+     * the calory intake over the whole
+     * time
+     * @return {null}
+     */
+    drawLineChart: function() {
+      // Get all foods
+      var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
+      console.log(foodStorage);
+      ////////////////////
+      // Aggregate data //
+      ////////////////////
+
+      // Get grouped data
+      var aggregatedData = [];
+
+      // Loop over each item
+      $.each(foodStorage, function(index, element) {
+        // Check if key exists
+        if (aggregatedData[element.dateAdded] == undefined) {
+          aggregatedData[element.dateAdded] = element.nf_calories;
+        } else {
+          aggregatedData[element.dateAdded] += element.nf_calories;
+        }
+      });
+
+      // We need to parse the date for the x axis
+      var parseTime = d3.timeParse('%Y-%m-%d');
+
+      var data = [];
+      for (var key in aggregatedData) {
+        data.push({date: parseTime(key), calories: +aggregatedData[key]});
+      }
+
+      /////////////////////
+      // Draw line chart //
+      /////////////////////
+
+      // Declare variables
+      var margin = {top: 20, right: 20, bottom: 10, left: 10};
+      var width = document.getElementById('line-chart').offsetWidth;
+      var height = window.innerHeight * 0.4;
+
+      // Set attributes to svg
+      var svg = d3.select('#line-chart-svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      // Append g to svg
+      var g = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
+
+      // Add scales
+      var x = d3.scaleTime()
+        .rangeRound([0, width])
+        .domain(d3.extent(data, function(d) {
+          return d.date;
+        }));
+
+      var y = d3.scaleLinear()
+        .rangeRound([height, 0])
+        .domain(d3.extent(data, function(d) {
+          return d.calories;
+        }));
+
+      // Add line
+      var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.calories); });
+
+      // Append x axis
+      g.append('g')
+        .attr('class', 'axis axis--x')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x));
+
+      g.append('g')
+        .attr('class', 'axis axis--y')
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('fill', '#000')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 6)
+        .attr('dy', '0.71em')
+        .style('text-anchor', 'end')
+        .text('Calories');
+
+      g.append('path')
+        .datum(data)
+        .attr('class', 'line')
+        .attr('d', line);
+      // console.log(aggregatedData);
     },
 
     /**
@@ -245,6 +346,7 @@ define(['backbone', 'd3', 'foodModel',
 
     // Delete selected item from list
     deleteItem: function(item) {
+
       // Get id from item
       var id = item.currentTarget.id;
 
@@ -261,6 +363,8 @@ define(['backbone', 'd3', 'foodModel',
 
       // Update local storage for specific date
       localStorage.myFoods = JSON.stringify(newArray);
+
+      this.renderFoods(this.day);
     },
   });
 
