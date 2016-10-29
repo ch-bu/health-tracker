@@ -40,12 +40,18 @@ main {
   }
 
   .axis--x path {
-    display: none;
+    // display: none;
+    stroke: #000;
+    stroke-width: 0.5;
   }
 
   .line {
     fill: none;
     stroke: steelblue;
     stroke-width: 1.5px;
+  }
+
+  .area {
+    fill: #26a69a;
   }
 }

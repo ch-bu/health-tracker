@@ -175,7 +175,7 @@ define(['backbone', 'd3', 'foodModel',
 
     initialize: function() {
       // Draw line Chart
-      // this.drawLineChart();
+      this.drawLineChart();
     },
 
     events: {
@@ -202,19 +202,17 @@ define(['backbone', 'd3', 'foodModel',
       this.renderList();
 
       // Draw line Chart
-      this.drawLineChart();
+      this.updateChart();
     },
 
     /**
-     * Draw line chart that display's
-     * the calory intake over the whole
-     * time
-     * @return {null}
+     * Gets well formed data from localStorage
+     * @return {Array} Returns the data of calories per day
      */
-    drawLineChart: function() {
+    getChartData: function() {
       // Get all foods
       var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
-      console.log(foodStorage);
+
       ////////////////////
       // Aggregate data //
       ////////////////////
@@ -225,7 +223,7 @@ define(['backbone', 'd3', 'foodModel',
       // Loop over each item
       $.each(foodStorage, function(index, element) {
         // Check if key exists
-        if (aggregatedData[element.dateAdded] == undefined) {
+        if (aggregatedData[element.dateAdded] === undefined) {
           aggregatedData[element.dateAdded] = element.nf_calories;
         } else {
           aggregatedData[element.dateAdded] += element.nf_calories;
@@ -240,53 +238,86 @@ define(['backbone', 'd3', 'foodModel',
         data.push({date: parseTime(key), calories: +aggregatedData[key]});
       }
 
-      /////////////////////
-      // Draw line chart //
-      /////////////////////
+      function sortByDateAscending(a, b) {
+          // Dates will be cast to numbers automagically:
+          return a.date - b.date;
+      }
+
+      // Sort data
+      data.sort(sortByDateAscending);
+
+      return data;
+    },
+
+    /**
+     * Draw line chart that display's
+     * the calory intake over the whole
+     * time
+     * @return {null}
+     */
+    drawLineChart: function() {
+      var self = this;
+
+      // Get data
+      var data = this.getChartData();
 
       // Declare variables
-      var margin = {top: 20, right: 20, bottom: 10, left: 10};
-      var width = document.getElementById('line-chart').offsetWidth;
-      var height = window.innerHeight * 0.4;
+      var margin = {top: 20, right: 80, bottom: 40, left: 35};
+      var width = document.getElementById('line-chart').offsetWidth - margin.left - margin.right;
+      this.height = window.innerHeight * 0.4 - margin.top - margin.bottom;
+      // var height = 400 - margin.top - margin.bottom;
 
       // Set attributes to svg
-      var svg = d3.select('#line-chart-svg')
-        .attr('width', width)
-        .attr('height', height);
+      this.svg = d3.select('#line-chart-svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', this.height + margin.top + margin.bottom);
 
       // Append g to svg
-      var g = svg.append('g')
+      this.g = this.svg.append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-
-
-      // Add scales
-      var x = d3.scaleTime()
+      ////////////////
+      // Add scales //
+      ////////////////
+      this.xScale = d3.scaleTime()
         .rangeRound([0, width])
         .domain(d3.extent(data, function(d) {
           return d.date;
         }));
 
-      var y = d3.scaleLinear()
-        .rangeRound([height, 0])
+      this.yScale = d3.scaleLinear()
+        .rangeRound([this.height, 0])
         .domain(d3.extent(data, function(d) {
           return d.calories;
         }));
 
-      // Add line
-      var line = d3.line()
-        .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.calories); });
+      // Define area
+      this.areaScale = d3.area()
+        .x(function(d) { return self.xScale(d.date); })
+        .y0(this.height)
+        .y1(function(d) { return self.yScale(d.calories); });
+
+      // Add the area
+      this.area = this.g.append('path')
+        .data([data])
+        .attr('class', 'area')
+        .attr('d', this.areaScale);
+
+      // // Add line
+      // var line = d3.line()
+      //   .x(function(d) { return x(d.date); })
+      //   .y(function(d) { return y(d.calories); });
 
       // Append x axis
-      g.append('g')
+      this.g.append('g')
         .attr('class', 'axis axis--x')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(d3.axisBottom(x));
+        .attr('transform', 'translate(0,' + this.height + ')')
+        .call(d3.axisBottom(self.xScale));
 
-      g.append('g')
+      // Append y axis
+      this.g.append('g')
         .attr('class', 'axis axis--y')
-        .call(d3.axisLeft(y))
+        .call(d3.axisLeft(self.yScale))
         .append('text')
         .attr('fill', '#000')
         .attr('transform', 'rotate(-90)')
@@ -295,11 +326,43 @@ define(['backbone', 'd3', 'foodModel',
         .style('text-anchor', 'end')
         .text('Calories');
 
-      g.append('path')
-        .datum(data)
-        .attr('class', 'line')
-        .attr('d', line);
-      // console.log(aggregatedData);
+      // // Add the line
+      // g.append('path')
+      //   .datum(data)
+      //   .attr('class', 'line')
+      //   .attr('d', line);
+    },
+
+    updateChart: function() {
+      var self = this;
+
+      // Get data
+      var data = this.getChartData();
+
+      // Update dominas of scales
+      this.xScale.domain(d3.extent(data, function(d) { return d.date; }));
+      this.yScale.domain(d3.extent(data, function(d) { return d.calories; }));
+
+      ///////////////////
+      // Update axises //
+      ///////////////////
+      var transition = this.svg.transition().duration(750);
+
+      // Change axises
+      transition.select('.axis--x')
+        .call(d3.axisBottom(self.xScale));
+
+      transition.select('.axis--y')
+        .call(d3.axisLeft(self.yScale));
+
+      this.areaScale = d3.area()
+        .x(function(d) { return self.xScale(d.date); })
+        .y0(this.height)
+        .y1(function(d) { return self.yScale(d.calories); });
+
+      // this.svg.select('.area')
+      //   .data([data])
+      //   .attr('d', self.areaScale);
     },
 
     /**
@@ -371,5 +434,3 @@ define(['backbone', 'd3', 'foodModel',
   return AppView;
 
 });
-
-
