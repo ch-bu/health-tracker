@@ -179,7 +179,11 @@ define(['backbone', 'd3', 'foodModel',
 
       // Draw line Chart
       this.drawLineChart();
-      this.drawFatPie();
+
+      // Draw pies
+      this.drawPie('#fatPie', 'fat', 'fatArc');
+      this.drawPie('#carboPie', 'fat', 'carboArc');
+      this.drawPie('#proteinPie', 'fat', 'proteinArc');
     },
 
     events: {
@@ -209,7 +213,9 @@ define(['backbone', 'd3', 'foodModel',
       this.updateChart();
 
       // Update fat chart
-      this.updateFat();
+      this.updatePie('#fatArc', 'fat');
+      this.updatePie('#carboArc', 'carbohydrates');
+      this.updatePie('#proteinArc', 'proteins');
     },
 
     /**
@@ -436,7 +442,7 @@ define(['backbone', 'd3', 'foodModel',
      * Draws a pie that shows the amout of fat
      * in all the calories
      */
-    drawFatPie: function() {
+    drawPie: function(id, macronutrient, arcId) {
       var self = this;
 
       // Init variables
@@ -454,7 +460,7 @@ define(['backbone', 'd3', 'foodModel',
       var result = this.getNutritionDay(date, data);
 
       // Grab svg
-      this.fatSvg = d3.select('#fatPie')
+      this.fatSvg = d3.select(id)
         .attr('width', width)
         .attr('height', height);
 
@@ -474,16 +480,24 @@ define(['backbone', 'd3', 'foodModel',
         .style('fill', '#ddd')
         .attr('d', self.arc);
 
-      // Foreground
-      this.fatForeground = g.append('path')
-        .attr('id', 'fatArc')
-        .datum({endAngle: result.fat * tau})
-        .style('fill', 'orange')
-        .attr('d', self.arc);
-
+      if (result) {
+        // Foreground
+        this.fatForeground = g.append('path')
+          .attr('id', arcId)
+          .datum({endAngle: result[macronutrient] * tau})
+          .style('fill', 'orange')
+          .attr('d', self.arc);
+      } else {
+        // Foreground
+        this.fatForeground = g.append('path')
+          .attr('id', arcId)
+          .datum({endAngle: 0 * tau})
+          .style('fill', 'orange')
+          .attr('d', self.arc);
+      }
     },
 
-    updateFat: function() {
+    updatePie: function(id, macronutrient) {
       var tau = 2 * Math.PI;
 
       // Get data
@@ -496,11 +510,11 @@ define(['backbone', 'd3', 'foodModel',
       var result = this.getNutritionDay(date, data);
 
       // Select arc
-      var fatArc = d3.select('#fatArc');
+      var fatArc = d3.select(id);
 
       // Change display
       if (result) {
-          fatArc.datum({endAngle: result.fat * tau})
+          fatArc.datum({endAngle: result[macronutrient]* tau})
           // .transition().duration(750)
           .attr('d', this.arc);
       } else {
