@@ -207,6 +207,9 @@ define(['backbone', 'd3', 'foodModel',
 
       // Draw line Chart
       this.updateChart();
+
+      // Update fat chart
+      this.updateFat();
     },
 
     /**
@@ -279,10 +282,18 @@ define(['backbone', 'd3', 'foodModel',
       // Sort data
       data.sort(sortByDateAscending);
 
+      // I don't know why but somethimes there
+      // is an empty value we need to delete
+      // Bad programming I guess.
+      if (!data[0].calories) {
+        data = data.slice(1, data.length);
+      }
+
       // We have to slice the data because
       // there is a small mistake with an empty object within
       // the array
-      return data.slice(1, data.length);
+      // return data.slice(0, data.length);
+      return data;
     },
 
     /**
@@ -296,6 +307,8 @@ define(['backbone', 'd3', 'foodModel',
 
       // Get data
       var data = this.getChartData();
+      // data.slice(1, data.length);
+      // console.log(data);
 
       // Declare variables
       var margin = {top: 20, right: 80, bottom: 40, left: 35};
@@ -372,6 +385,7 @@ define(['backbone', 'd3', 'foodModel',
 
       // Get data
       var data = this.getChartData();
+      // data = data.slice(1, data.length);
 
       // Update dominas of scales
       var myxScale = this.xScale.domain(d3.extent(data, function(d) {
@@ -409,18 +423,35 @@ define(['backbone', 'd3', 'foodModel',
         .attr('d', myAreaScale);
     },
 
+    getNutritionDay: function(date, data) {
+      var result = $.grep(data, function(e) {
+        var aDate = moment(new Date(e.date)).format('YYYY-MM-DD');
+        return aDate == date;
+      })[0];
+
+      return result;
+    },
+
     /**
      * Draws a pie that shows the amout of fat
      * in all the calories
      */
     drawFatPie: function() {
-      // Get data
-      var data = this.getChartData();
+      var self = this;
 
       // Init variables
       var width = 200;
       var height = 200;
       var tau = 2 * Math.PI;
+
+      // Get data
+      var data = this.getChartData();
+
+      // Get current day
+      var date = this.day.format("YYYY-MM-DD");
+
+      // Get data for specific day
+      var result = this.getNutritionDay(date, data);
 
       // Grab svg
       this.fatSvg = d3.select('#fatPie')
@@ -431,19 +462,8 @@ define(['backbone', 'd3', 'foodModel',
       var g = this.fatSvg.append('g')
         .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-      // Get current day
-      var date = this.day.format("YYYY-MM-DD");
-      console.log(data);
-      var result = $.grep(data, function(e) {
-        var aDate = moment(new Date(e.date)).format('YYYY-MM-DD');
-        console.log(aDate);
-        console.log(date);
-        return aDate == date;
-      });
-      console.log(result);
-
       // Make arc
-      var arc = d3.arc()
+      this.arc = d3.arc()
         .innerRadius(70)
         .outerRadius(85)
         .startAngle(0);
@@ -452,14 +472,42 @@ define(['backbone', 'd3', 'foodModel',
       g.append('path')
         .datum({endAngle: tau})
         .style('fill', '#ddd')
-        .attr('d', arc);
+        .attr('d', self.arc);
 
       // Foreground
-      var foreground = g.append('path')
-        .datum({endAngle: 0.50 * tau})
+      this.fatForeground = g.append('path')
+        .attr('id', 'fatArc')
+        .datum({endAngle: result.fat * tau})
         .style('fill', 'orange')
-        .attr('d', arc);
+        .attr('d', self.arc);
 
+    },
+
+    updateFat: function() {
+      var tau = 2 * Math.PI;
+
+      // Get data
+      var data = this.getChartData();
+
+      // Get current day
+      var date = this.day.format("YYYY-MM-DD");
+
+      // Get data for specific day
+      var result = this.getNutritionDay(date, data);
+
+      // Select arc
+      var fatArc = d3.select('#fatArc');
+
+      // Change display
+      if (result) {
+          fatArc.datum({endAngle: result.fat * tau})
+          // .transition().duration(750)
+          .attr('d', this.arc);
+      } else {
+          fatArc.datum({endAngle: 0 * tau})
+          // .transition().duration(750)
+          .attr('d', this.arc);
+      }
     },
 
     /**
