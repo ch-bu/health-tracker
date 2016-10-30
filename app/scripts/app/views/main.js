@@ -246,7 +246,10 @@ define(['backbone', 'd3', 'foodModel',
       // Sort data
       data.sort(sortByDateAscending);
 
-      return data;
+      // We have to slice the data because
+      // there is a small mistake with an empty object within
+      // the array
+      return data.slice(1, data.length);
     },
 
     /**
@@ -263,9 +266,9 @@ define(['backbone', 'd3', 'foodModel',
 
       // Declare variables
       var margin = {top: 20, right: 80, bottom: 40, left: 35};
-      var width = document.getElementById('line-chart').offsetWidth - margin.left - margin.right;
+      var width = document.getElementById('line-chart').offsetWidth -
+        margin.left - margin.right;
       this.height = window.innerHeight * 0.4 - margin.top - margin.bottom;
-      // var height = 400 - margin.top - margin.bottom;
 
       // Set attributes to svg
       this.svg = d3.select('#line-chart-svg')
@@ -274,7 +277,8 @@ define(['backbone', 'd3', 'foodModel',
 
       // Append g to svg
       this.g = this.svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        .attr('transform', 'translate(' + margin.left +
+             ',' + margin.top + ')');
 
       ////////////////
       // Add scales //
@@ -291,22 +295,25 @@ define(['backbone', 'd3', 'foodModel',
           return d.calories;
         }));
 
+      //////////////////
+      // Add the area //
+      //////////////////
+
       // Define area
       this.areaScale = d3.area()
         .x(function(d) { return self.xScale(d.date); })
         .y0(this.height)
         .y1(function(d) { return self.yScale(d.calories); });
 
-      // Add the area
+      // Draw area
       this.area = this.g.append('path')
         .data([data])
         .attr('class', 'area')
         .attr('d', this.areaScale);
 
-      // // Add line
-      // var line = d3.line()
-      //   .x(function(d) { return x(d.date); })
-      //   .y(function(d) { return y(d.calories); });
+      ///////////////////
+      // Append axises //
+      ///////////////////
 
       // Append x axis
       this.g.append('g')
@@ -325,12 +332,6 @@ define(['backbone', 'd3', 'foodModel',
         .attr('dy', '0.71em')
         .style('text-anchor', 'end')
         .text('Calories');
-
-      // // Add the line
-      // g.append('path')
-      //   .datum(data)
-      //   .attr('class', 'line')
-      //   .attr('d', line);
     },
 
     updateChart: function() {
@@ -340,8 +341,8 @@ define(['backbone', 'd3', 'foodModel',
       var data = this.getChartData();
 
       // Update dominas of scales
-      this.xScale.domain(d3.extent(data, function(d) { return d.date; }));
-      this.yScale.domain(d3.extent(data, function(d) { return d.calories; }));
+      var myxScale = this.xScale.domain(d3.extent(data, function(d) { return d.date; }));
+      var myyScale = this.yScale.domain(d3.extent(data, function(d) { return d.calories; }));
 
       ///////////////////
       // Update axises //
@@ -355,14 +356,24 @@ define(['backbone', 'd3', 'foodModel',
       transition.select('.axis--y')
         .call(d3.axisLeft(self.yScale));
 
-      this.areaScale = d3.area()
-        .x(function(d) { return self.xScale(d.date); })
-        .y0(this.height)
-        .y1(function(d) { return self.yScale(d.calories); });
+      console.log(data);
 
-      // this.svg.select('.area')
-      //   .data([data])
-      //   .attr('d', self.areaScale);
+      /////////////////
+      // Update area //
+      /////////////////
+
+      var myAreaScale = this.areaScale = d3.area()
+        .x(function(d) { return myxScale(d.date); })
+        .y0(this.height)
+        .y1(function(d) { return myyScale(d.calories); });
+
+      console.log(this.areaScale(data));
+
+      this.svg.selectAll('path')
+        .data([data])
+        .transition()
+        .duration(750)
+        .attr('d', myAreaScale);
     },
 
     /**
@@ -388,7 +399,9 @@ define(['backbone', 'd3', 'foodModel',
       var foodStorage = JSON.parse(localStorage.getItem('myFoods'));
 
       // Grep items for specific day
-      var foods = $.grep(foodStorage, function(e){ return e.dateAdded == day; });
+      var foods = $.grep(foodStorage, function(e) {
+        return e.dateAdded == day;
+      });
 
       return foods;
     },
