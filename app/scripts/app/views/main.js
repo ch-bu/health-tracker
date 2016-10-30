@@ -13,13 +13,13 @@ define(['backbone', 'd3', 'foodModel',
     },
 
     initialize: function() {
+      // Init date for data
+      this.currDate = moment();
+
       // Init models and collections
       this.foodModel = new FoodModel();
       this.foodCollection = new FoodCollection();
-      this.foodView = new FoodView();
-
-      // Init date for data
-      this.currDate = moment();
+      this.foodView = new FoodView(this.currDate);
 
       // Render food
       this.foodView.renderFoods(this.currDate);
@@ -173,9 +173,13 @@ define(['backbone', 'd3', 'foodModel',
   var FoodView = Backbone.View.extend({
     el: '#food-display',
 
-    initialize: function() {
+    initialize: function(currDate) {
+      // Save current date
+      this.day = currDate;
+
       // Draw line Chart
       this.drawLineChart();
+      this.drawFatPie();
     },
 
     events: {
@@ -233,9 +237,38 @@ define(['backbone', 'd3', 'foodModel',
       // We need to parse the date for the x axis
       var parseTime = d3.timeParse('%Y-%m-%d');
 
+      // Init final data array
       var data = [];
+
+      // Loop over every day in data
+      // we need to restructure the data so that we have
+      // objects inside the array
       for (var key in aggregatedData) {
-        data.push({date: parseTime(key), calories: +aggregatedData[key]});
+        // Init macronutritions for each
+        // day anew
+        var proteins = 0;
+        var fat = 0;
+        var carbohydrates = 0;
+        var total = 0;
+
+        // Get each item for specific day
+        $.each(foodStorage, function(index, element) {
+          if (element.dateAdded == key) {
+            // Add grams
+            proteins += element['nf_protein'];
+            fat += element['nf_total_fat'];
+            carbohydrates += element['nf_total_carbohydrate'];
+            total += element['nf_protein'] + element['nf_total_fat'] +
+                     element['nf_total_carbohydrate'];
+          }
+        });
+
+        // Add data for current day
+        data.push({date: parseTime(key),
+                   calories: +aggregatedData[key],
+                   proteins: proteins / total,
+                   fat: fat / total,
+                   carbohydrates: carbohydrates / total});
       }
 
       function sortByDateAscending(a, b) {
@@ -360,8 +393,6 @@ define(['backbone', 'd3', 'foodModel',
       transition.select('.axis--y')
         .call(d3.axisLeft(self.yScale));
 
-      console.log(data);
-
       /////////////////
       // Update area //
       /////////////////
@@ -371,13 +402,64 @@ define(['backbone', 'd3', 'foodModel',
         .y0(this.height)
         .y1(function(d) { return myyScale(d.calories); });
 
-      console.log(this.areaScale(data));
-
       this.svg.selectAll('path')
         .data([data])
         .transition()
         .duration(750)
         .attr('d', myAreaScale);
+    },
+
+    /**
+     * Draws a pie that shows the amout of fat
+     * in all the calories
+     */
+    drawFatPie: function() {
+      // Get data
+      var data = this.getChartData();
+
+      // Init variables
+      var width = 200;
+      var height = 200;
+      var tau = 2 * Math.PI;
+
+      // Grab svg
+      this.fatSvg = d3.select('#fatPie')
+        .attr('width', width)
+        .attr('height', height);
+
+      // Append g to middle of svg
+      var g = this.fatSvg.append('g')
+        .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+      // Get current day
+      var date = this.day.format("YYYY-MM-DD");
+      console.log(data);
+      var result = $.grep(data, function(e) {
+        var aDate = moment(new Date(e.date)).format('YYYY-MM-DD');
+        console.log(aDate);
+        console.log(date);
+        return aDate == date;
+      });
+      console.log(result);
+
+      // Make arc
+      var arc = d3.arc()
+        .innerRadius(70)
+        .outerRadius(85)
+        .startAngle(0);
+
+      // Background
+      g.append('path')
+        .datum({endAngle: tau})
+        .style('fill', '#ddd')
+        .attr('d', arc);
+
+      // Foreground
+      var foreground = g.append('path')
+        .datum({endAngle: 0.50 * tau})
+        .style('fill', 'orange')
+        .attr('d', arc);
+
     },
 
     /**
