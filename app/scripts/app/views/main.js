@@ -291,9 +291,9 @@ define(['backbone', 'd3', 'foodModel',
 
       this.yScale = d3.scaleLinear()
         .rangeRound([this.height, 0])
-        .domain(d3.extent(data, function(d) {
-          return d.calories;
-        }));
+        .domain([0, d3.max(data, function(d) {
+        return d.calories;
+      })]);
 
       //////////////////
       // Add the area //
@@ -341,8 +341,12 @@ define(['backbone', 'd3', 'foodModel',
       var data = this.getChartData();
 
       // Update dominas of scales
-      var myxScale = this.xScale.domain(d3.extent(data, function(d) { return d.date; }));
-      var myyScale = this.yScale.domain(d3.extent(data, function(d) { return d.calories; }));
+      var myxScale = this.xScale.domain(d3.extent(data, function(d) {
+        return d.date;
+      }));
+      var myyScale = this.yScale.domain([0, d3.max(data, function(d) {
+        return d.calories;
+      })]);
 
       ///////////////////
       // Update axises //
