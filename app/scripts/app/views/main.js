@@ -182,8 +182,8 @@ define(['backbone', 'd3', 'foodModel',
 
       // Draw pies
       this.drawPie('#fatPie', 'fat', 'fatArc');
-      this.drawPie('#carboPie', 'fat', 'carboArc');
-      this.drawPie('#proteinPie', 'fat', 'proteinArc');
+      this.drawPie('#carboPie', 'carbohydrates', 'carboArc');
+      this.drawPie('#proteinPie', 'protein', 'proteinArc');
     },
 
     events: {
@@ -317,7 +317,7 @@ define(['backbone', 'd3', 'foodModel',
       // console.log(data);
 
       // Declare variables
-      var margin = {top: 20, right: 80, bottom: 40, left: 35};
+      var margin = {top: 20, right: 80, bottom: 40, left: 55};
       var width = document.getElementById('line-chart').offsetWidth -
         margin.left - margin.right;
       this.height = window.innerHeight * 0.4 - margin.top - margin.bottom;
@@ -480,19 +480,28 @@ define(['backbone', 'd3', 'foodModel',
         .style('fill', '#ddd')
         .attr('d', self.arc);
 
+      d3.select(id).append('text')
+        .attr('x', (width / 2) - 40)
+        .attr('y', height / 2)
+        .attr('dy', '.35em')
+        .style('font-family', 'Inconsolata')
+        .text(function() {
+          return macronutrient;
+        });
+
       if (result) {
         // Foreground
         this.fatForeground = g.append('path')
           .attr('id', arcId)
           .datum({endAngle: result[macronutrient] * tau})
-          .style('fill', 'orange')
+          .style('fill', '#26a69a')
           .attr('d', self.arc);
       } else {
         // Foreground
         this.fatForeground = g.append('path')
           .attr('id', arcId)
           .datum({endAngle: 0 * tau})
-          .style('fill', 'orange')
+          .style('fill', '#26a69a')
           .attr('d', self.arc);
       }
     },
