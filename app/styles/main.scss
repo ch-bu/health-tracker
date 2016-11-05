@@ -9,6 +9,10 @@ main {
 
   height: 100vh;
 
+  #line-chart {
+    overflow: scroll;
+  }
+
   #food-list {
     li {
       padding: 5px;
