@@ -45,7 +45,7 @@ gulp.task('bower-files', () => {
  */
 gulp.task('lint', () =>
   gulp.src(['app/scripts/app/**/*.js', '!app/scripts/templates.js'])
-    .pipe($.eslint())
+    .pipe($.eslint({fix: true}))
     .pipe($.eslint.format())
     .pipe($.if(!browserSync.active, $.eslint.failOnError()))
 );
@@ -178,34 +178,6 @@ gulp.task('scripts-vendor', () =>
     .pipe(gulp.dest('dist/scripts'))
     .pipe(gulp.dest('.tmp/scripts'))
 );
-
-/**
- * Optimize requirejs
- */
-// gulp.task('requirejs', () => {
-//   return gulp.src('app/scripts/app/app.js')
-//     .pipe(requirejsOptimize({
-//       baseUrl: './',
-//       appDir: 'app/scripts',
-//       dir: '.tmp/scripts/build',
-//       mainConfigFile: 'app/scripts/app.js',
-
-//       modules: [
-//         {
-//           name: 'app',
-//           // include: [
-//           //   'vendor/jquery',
-//           //   'vendor/backbone',
-//           // ]
-//         },
-//       ],
-
-//       optimize: 'uglify2',
-
-//       // out: 'main-build.js'
-//     }))
-//     .pipe(gulp.dest('.tmp/scripts'));
-// });
 
 /**
  * Minify main.js

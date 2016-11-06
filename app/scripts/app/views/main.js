@@ -96,7 +96,7 @@ define(['backbone', 'd3', 'foodModel',
               var carbohydrates = 0;
               var total = 0;
 
-              // Get each item for specific day
+
               $.each(foodStorage, function(index, element) {
                 if (element.dateAdded === key) {
                   // Add grams
@@ -107,10 +107,11 @@ define(['backbone', 'd3', 'foodModel',
                            element.nf_total_carbohydrate;
                 }
               });
-
+              // Get each item for specific day
               // for (var i = 0; i < foodStorage.length; i++) {
               //   var element = foodStorage[i];
-              //   if (element.dateAdded === i) {
+
+              //   if (element.dateAdded === key) {
               //     // Add grams
               //     proteins += element.nf_protein;
               //     fat += element.nf_total_fat;
