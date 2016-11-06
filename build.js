@@ -1,22 +1,28 @@
-{
-  appDir: 'app',
-  dir: '../../dist/scripts',
-  mainConfigFile: 'app/scripts/main.js',
-  modules: [
-    {
-      name: 'common',
+({
+  baseUrl: '.',
+  // appDir: 'app',
+  // dir: '../../dist/scripts',
+  // mainConfigFile: 'app/scripts/app/views/main.js',
+  name: 'app/scripts/app/views/main.js',
+//
+  // modules: [
+  //   {
+  //     name: 'scripts/app/views/main',
 
-      include: [
-        'jquery'
-      ]
-    },
+  //     include: [
+  //       'jquery',
+  //       'backbone',
+  //     ]
+  //   },
 
     // {
     //   name: 'mainview',
     //   include: ['views/main', 'models/model']
     // }
-  ],
+  // ],
 
-  optimize: 'uglify2'
+  optimize: 'uglify2',
 
-}
+  out: 'main-built.js'
+
+});
