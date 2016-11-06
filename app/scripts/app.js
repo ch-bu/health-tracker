@@ -4,7 +4,6 @@
 // https://github.com/tastejs/todomvc/tree/gh-pages/examples/backbone_require
 
 require.config({
-  // baseUrl: 'scripts',
 
   paths: {
     underscore: 'vendor/underscore',

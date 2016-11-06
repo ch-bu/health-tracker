@@ -182,11 +182,30 @@ gulp.task('scripts-vendor', () =>
 /**
  * Optimize requirejs
  */
-gulp.task('requirejs', () => {
-  return gulp.src('app/scripts/app/views/main.js')
-    .pipe(requirejsOptimize())
-    .pipe(gulp.dest('.tmp/scripts'));
-});
+// gulp.task('requirejs', () => {
+//   return gulp.src('app/scripts/app/app.js')
+//     .pipe(requirejsOptimize({
+//       baseUrl: './',
+//       appDir: 'app/scripts',
+//       dir: '.tmp/scripts/build',
+//       mainConfigFile: 'app/scripts/app.js',
+
+//       modules: [
+//         {
+//           name: 'app',
+//           // include: [
+//           //   'vendor/jquery',
+//           //   'vendor/backbone',
+//           // ]
+//         },
+//       ],
+
+//       optimize: 'uglify2',
+
+//       // out: 'main-build.js'
+//     }))
+//     .pipe(gulp.dest('.tmp/scripts'));
+// });
 
 /**
  * Minify main.js
@@ -320,22 +339,23 @@ gulp.task('default', ['clean'], cb =>
  */
  gulp.task('requirejsBuild', () => {
   rjs({
-    baseUrl: 'app/scripts',
-    dir: '.tmp/scripts',
-    // mainConfigFile: 'app/scripts/main.js',
-    // out: 'test.js',
+    baseUrl: './',
+    appDir: 'app/scripts',
+    dir: '.tmp/scripts/build',
+    mainConfigFile: 'app/scripts/app.js',
 
     modules: [
       {
-        name: 'common',
-
-        include: [
-          'vendor/jquery',
-          'vendor/d3'
-        ]
-      }
+        name: 'app',
+        // include: [
+        //   'vendor/jquery',
+        //   'vendor/backbone',
+        // ]
+      },
     ],
 
-    optimize: 'uglify2'
+    optimize: 'uglify2',
+
+    // out: 'main-build.js'
   });
  });

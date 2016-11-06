@@ -1,7 +1,7 @@
+/* global define: false */
+
 define(['underscore', 'backbone'], function(_, Backbone) {
-
   var FoodModel = Backbone.Model.extend({
-
     initialize: function() {
     },
 

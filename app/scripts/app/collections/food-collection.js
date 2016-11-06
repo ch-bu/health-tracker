@@ -1,21 +1,21 @@
+/* global define: false */
+
 define(['underscore', 'backbone', 'foodModel'],
   function(_, Backbone, FoodModel) {
+    var FoodCollection = Backbone.Collection.extend({
+      model: FoodModel,
 
-  var FoodCollection = Backbone.Collection.extend({
+      initialize: function() {
+      },
 
-    model: FoodModel,
+      apiUrl: function() {
+        return 'https://api.nutritionix.com/v1_1/search/';
+      },
 
-    initialize: function() {
-    },
+      parse: function(response) {
+        return response.hits;
+      }
+    });
 
-    apiUrl: function() {
-      return 'https://api.nutritionix.com/v1_1/search/';
-    },
-
-    parse: function(response) {
-      return response.hits;
-    }
+    return FoodCollection;
   });
-
-  return FoodCollection;
-});
