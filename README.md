@@ -1,4 +1,6 @@
-## Overview
+## Health Tracker
+
+![Teaser Image](teaser_image.png)
 
 This is an optional project from the [Frontend Web Developer Nanodegree](https://www.udacity.com/course/front-end-web-developer-nanodegree--nd001) from [Udacity](https://www.udacity.com/). The application is a health tracker app that allows a user to keep track of their calorie intake. Users are able to search for specific foods using the [Nutrionix API](https://developer.nutritionix.com/) and can add selected foods to their daily intake. The total daily calorie intake is displayed for the user.
 
