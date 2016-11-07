@@ -96,20 +96,7 @@ define(['backbone', 'd3', 'foodModel',
               var carbohydrates = 0;
               var total = 0;
 
-              $.each(foodStorage, function(index, element) {
-                if (element.dateAdded === key) {
-                  // Add grams
-                  proteins += element.nf_protein;
-                  fat += element.nf_total_fat;
-                  carbohydrates += element.nf_total_carbohydrate;
-                  total += element.nf_protein + element.nf_total_fat +
-                           element.nf_total_carbohydrate;
-                }
-              });
-              // Get each item for specific day
-              // for (var i = 0; i < foodStorage.length; i++) {
-              //   var element = foodStorage[i];
-
+              // $.each(foodStorage, function(index, element) {
               //   if (element.dateAdded === key) {
               //     // Add grams
               //     proteins += element.nf_protein;
@@ -118,7 +105,20 @@ define(['backbone', 'd3', 'foodModel',
               //     total += element.nf_protein + element.nf_total_fat +
               //              element.nf_total_carbohydrate;
               //   }
-              // }
+              // });
+              //  Get each item for specific day
+              for (var i = 0; i < foodStorage.length; i++) {
+                var element = foodStorage[i];
+
+                if (element.dateAdded === key) {
+                  // Add grams
+                  proteins += element.nf_protein;
+                  fat += element.nf_total_fat;
+                  carbohydrates += element.nf_total_carbohydrate;
+                  total += element.nf_protein + element.nf_total_fat +
+                           element.nf_total_carbohydrate;
+                }
+              }
 
               // Add data for current day
               data.push({date: parseTime(key),
