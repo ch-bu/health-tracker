@@ -96,16 +96,6 @@ define(['backbone', 'd3', 'foodModel',
               var carbohydrates = 0;
               var total = 0;
 
-              // $.each(foodStorage, function(index, element) {
-              //   if (element.dateAdded === key) {
-              //     // Add grams
-              //     proteins += element.nf_protein;
-              //     fat += element.nf_total_fat;
-              //     carbohydrates += element.nf_total_carbohydrate;
-              //     total += element.nf_protein + element.nf_total_fat +
-              //              element.nf_total_carbohydrate;
-              //   }
-              // });
               //  Get each item for specific day
               for (var i = 0; i < foodStorage.length; i++) {
                 var element = foodStorage[i];
@@ -158,6 +148,10 @@ define(['backbone', 'd3', 'foodModel',
 
         // Get data
         var data = this.getChartData();
+
+        // if (isNaN(data[0].calories)) {
+        //   data.slice(1, data.length);
+        // }
         // data.slice(1, data.length);
         // console.log(data);
 
@@ -230,7 +224,13 @@ define(['backbone', 'd3', 'foodModel',
 
         // Get data
         var data = this.getChartData();
-        data = data.slice(1, data.length);
+
+        // There is a small programming error somewhere
+        // in my app. This is just a workaround that gets the
+        // app working. Not recommended for production
+        if (!data[0].date) {
+          data = data.slice(1, data.length);
+        }
 
         // Update dominas of scales
         var myxScale = this.xScale.domain(d3.extent(data, function(d) {
