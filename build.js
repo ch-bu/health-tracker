@@ -1,7 +1,7 @@
 ({
   baseUrl: './',
   appDir: 'app/scripts',
-  dir: '.tmp/scripts/build',
+  dir: 'dist/scripts',
   mainConfigFile: 'app/scripts/app.js',
 
   modules: [
@@ -11,4 +11,4 @@
   ],
 
   optimize: 'uglify2',
-});
+})

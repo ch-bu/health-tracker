@@ -149,56 +149,46 @@ gulp.task('styles', () => {
 // Concatenate and minify JavaScript. Optionally transpiles ES2015 code to ES5.
 // to enable ES2015 support remove the line `"only": "gulpfile.babel.js",` in the
 // `.babelrc` file.
-gulp.task('scripts-vendor', () =>
-  gulp.src([
-    // Note: Since we are not using useref in the scripts build pipeline,
-    //       you need to explicitly list your scripts here in the right order
-    //       to be correctly concatenated
-    './app/scripts/vendor/handlebars.js',
-    './app/scripts/vendor/idb.js',
-    './app/scripts/templates.js',
-    './app/scripts/vendor/jquery.js',
-    './app/scripts/vendor/jquery-migrate.js',
-    './app/scripts/vendor/underscore.js',
-    './app/scripts/vendor/backbone.js',
-    './app/scripts/vendor/moment.js',
-    // './app/scripts/vendor/require.js',
-    './app/scripts/vendor/materialize.js',
-    './app/scripts/vendor/d3.js',
-  ])
-    .pipe($.newer('.tmp/scripts'))
-    .pipe($.newer('.dist/scripts'))
-    .pipe($.sourcemaps.init())
-    // .pipe($.babel({compact: false}))
-    .pipe($.sourcemaps.write())
-    .pipe($.concat('vendor.min.js'))
-    .pipe($.uglify())
-    .pipe($.size({title: 'scripts'}))
-    .pipe($.sourcemaps.write('.'))
-    .pipe(gulp.dest('dist/scripts'))
-    .pipe(gulp.dest('.tmp/scripts'))
-);
+// gulp.task('scripts-vendor', () =>
+//   gulp.src([
+//     // Note: Since we are not using useref in the scripts build pipeline,
+//     //       you need to explicitly list your scripts here in the right order
+//     //       to be correctly concatenated
+//     './app/scripts/vendor/handlebars.js',
+//     './app/scripts/vendor/idb.js',
+//     './app/scripts/templates.js',
+//     './app/scripts/vendor/jquery.js',
+//     './app/scripts/vendor/jquery-migrate.js',
+//     './app/scripts/vendor/underscore.js',
+//     './app/scripts/vendor/backbone.js',
+//     './app/scripts/vendor/moment.js',
+//     // './app/scripts/vendor/require.js',
+//     './app/scripts/vendor/materialize.js',
+//     './app/scripts/vendor/d3.js',
+//   ])
+//     .pipe($.newer('.tmp/scripts'))
+//     .pipe($.newer('.dist/scripts'))
+//     .pipe($.sourcemaps.init())
+//     // .pipe($.babel({compact: false}))
+//     .pipe($.sourcemaps.write())
+//     .pipe($.concat('vendor.min.js'))
+//     .pipe($.uglify())
+//     .pipe($.size({title: 'scripts'}))
+//     .pipe($.sourcemaps.write('.'))
+//     .pipe(gulp.dest('dist/scripts'))
+//     .pipe(gulp.dest('.tmp/scripts'))
+// );
 
-/**
- * Minify main.js
- */
-gulp.task('scripts-app', () => {
+
+gulp.task('copy', () =>
   gulp.src([
-    'app/scripts/app/views/main.js',
-    'app/scripts/app/app.js',
-  ])
-  .pipe($.newer('.tmp/scripts'))
-  .pipe($.newer('dist/scripts'))
-  .pipe($.sourcemaps.init())
-  .pipe($.babel())
-  .pipe($.sourcemaps.write())
-  .pipe($.concat('main.min.js'))
-  .pipe($.uglify())
-  .pipe($.size({title: 'scripts'}))
-  .pipe($.sourcemaps.write('.'))
-  .pipe(gulp.dest('dist/scripts'))
-  .pipe(gulp.dest('.tmp/scripts'));
-});
+    'app/*',
+    '!app/*.html',
+  ], {
+    dot: true
+  }).pipe(gulp.dest('dist'))
+    .pipe($.size({title: 'copy'}))
+);
 
 /**
  * Scan your HTML for assets & optimize them
@@ -271,7 +261,7 @@ gulp.task('serve', ['styles'], () => {
 
   gulp.watch(['app/**/*.html'], reload);
   gulp.watch(['app/styles/**/*.scss'], ['styles', reload]);
-  gulp.watch(['app/scripts/app/**/*.js'], ['lint', 'scripts-app', reload]);
+  gulp.watch(['app/scripts/app/**/*.js'], ['lint', reload]);
   gulp.watch(['app/images/**/*'], reload);
   gulp.watch(['app/templates/*'], ['templates', reload]);
 });
@@ -279,7 +269,7 @@ gulp.task('serve', ['styles'], () => {
 /**
  * Build and serve the output from the dist build
  */
-gulp.task('serve:dist', ['default'], () =>
+gulp.task('serve:dist', () =>
   browserSync({
     notify: false,
     logPrefix: 'WSK',
@@ -299,35 +289,8 @@ gulp.task('serve:dist', ['default'], () =>
  */
 gulp.task('default', ['clean'], cb =>
   runSequence(
-    'styles',
-    ['bower-files', 'lint', 'html', 'scripts-vendor', 'scripts-app',
+    ['clean', 'bower-files', 'lint', 'html',
     'styles', 'images', 'copy', 'copy-fonts'],
     cb
   )
 );
-
-/**
- * R.js javascript files
- */
- gulp.task('requirejsBuild', () => {
-  rjs({
-    baseUrl: './',
-    appDir: 'app/scripts',
-    dir: '.tmp/scripts/build',
-    mainConfigFile: 'app/scripts/app.js',
-
-    modules: [
-      {
-        name: 'app',
-        // include: [
-        //   'vendor/jquery',
-        //   'vendor/backbone',
-        // ]
-      },
-    ],
-
-    optimize: 'uglify2',
-
-    // out: 'main-build.js'
-  });
- });
