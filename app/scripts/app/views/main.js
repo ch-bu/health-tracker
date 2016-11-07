@@ -96,7 +96,6 @@ define(['backbone', 'd3', 'foodModel',
               var carbohydrates = 0;
               var total = 0;
 
-
               $.each(foodStorage, function(index, element) {
                 if (element.dateAdded === key) {
                   // Add grams
@@ -145,17 +144,7 @@ define(['backbone', 'd3', 'foodModel',
         // Sort data
         data.sort(sortByDateAscending);
 
-        // I don't know why but somethimes there
-        // is an empty value we need to delete
-        // Bad programming I guess.
-        // if (!data[0].calories) {
-        //   data = data.slice(1, data.length);
-        // }
-
-        // We have to slice the data because
-        // there is a small mistake with an empty object within
-        // the array
-        // return data.slice(0, data.length);
+        // Return data
         return data;
       },
 
@@ -241,7 +230,7 @@ define(['backbone', 'd3', 'foodModel',
 
         // Get data
         var data = this.getChartData();
-        // data = data.slice(1, data.length);
+        data = data.slice(1, data.length);
 
         // Update dominas of scales
         var myxScale = this.xScale.domain(d3.extent(data, function(d) {
@@ -512,7 +501,9 @@ define(['backbone', 'd3', 'foodModel',
         this.foodCollection.fetch({
           // Add parameters to api request
           data: $.param({results: '0:5', appId: '14f78fa8',
-            fields: 'item_name,brand_name,item_description,nf_serving_weight_grams,nf_calories,nf_total_fat,nf_total_carbohydrate,nf_protein,nf_sugars',
+            fields: 'item_name,brand_name,item_description,nf_serving_weight' +
+                    '_grams,nf_calories,nf_total_fat,nf_total_carbohydrate,'  +
+                    'nf_protein,nf_sugars',
             appKey: '05fb77c91338716322dfed86dc63eabc'}),
 
           success: function() {
