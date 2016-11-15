@@ -18,7 +18,7 @@ define(['backbone', 'd3', 'foodModel',
         // Draw pies
         this.drawPie('#fatPie', 'fat', 'fatArc');
         this.drawPie('#carboPie', 'carbohydrates', 'carboArc');
-        this.drawPie('#proteinPie', 'protein', 'proteinArc');
+        this.drawPie('#proteinPie', 'proteins', 'proteinArc');
       },
 
       events: {
@@ -225,46 +225,50 @@ define(['backbone', 'd3', 'foodModel',
         // Get data
         var data = this.getChartData();
 
-        // There is a small programming error somewhere
-        // in my app. This is just a workaround that gets the
-        // app working. Not recommended for production
-        if (!data[0].date) {
+        // Don update the chart if there is no data
+        if (data.length !== 0) {
+          // There is a small programming error somewhere
+          // in my app. This is just a workaround that gets the
+          // app working. Not recommended for production
+          if (!data[0].date) {
           data = data.slice(1, data.length);
+
+          // Update domains of scales
+          var myxScale = this.xScale.domain(d3.extent(data, function(d) {
+            return d.date;
+          }));
+          var myyScale = this.yScale.domain([0, d3.max(data, function(d) {
+            return d.calories;
+          })]);
+
+          // Update axises
+          var transition = this.svg.transition().duration(750);
+
+          // Change axises
+          transition.select('.axis--x')
+            .call(d3.axisBottom(self.xScale));
+
+          transition.select('.axis--y')
+            .call(d3.axisLeft(self.yScale));
+
+          // Update area
+          var myAreaScale = this.areaScale = d3.area()
+            .x(function(d) {
+              return myxScale(d.date);
+            })
+            .y0(this.height)
+            .y1(function(d) {
+              return myyScale(d.calories);
+            });
+
+          // Update area chart
+          this.svg.selectAll('path')
+            .data([data])
+            .transition()
+            .duration(750)
+            .attr('d', myAreaScale);
+          }
         }
-
-        // Update dominas of scales
-        var myxScale = this.xScale.domain(d3.extent(data, function(d) {
-          return d.date;
-        }));
-        var myyScale = this.yScale.domain([0, d3.max(data, function(d) {
-          return d.calories;
-        })]);
-
-        // Update axises
-        var transition = this.svg.transition().duration(750);
-
-        // Change axises
-        transition.select('.axis--x')
-          .call(d3.axisBottom(self.xScale));
-
-        transition.select('.axis--y')
-          .call(d3.axisLeft(self.yScale));
-
-        // Update area
-        var myAreaScale = this.areaScale = d3.area()
-          .x(function(d) {
-            return myxScale(d.date);
-          })
-          .y0(this.height)
-          .y1(function(d) {
-            return myyScale(d.calories);
-          });
-
-        this.svg.selectAll('path')
-          .data([data])
-          .transition()
-          .duration(750)
-          .attr('d', myAreaScale);
       },
 
       getNutritionDay: function(date, data) {
@@ -329,11 +333,12 @@ define(['backbone', 'd3', 'foodModel',
             return macronutrient;
           });
 
+        // Change chart if data is available
         if (result) {
           // Foreground
           this.fatForeground = g.append('path')
             .attr('id', arcId)
-            .datum({endAngle: result.macronutrient * tau})
+            .datum({endAngle: result[macronutrient] * tau})
             .style('fill', '#26a69a')
             .attr('d', self.arc);
         } else {
@@ -511,7 +516,8 @@ define(['backbone', 'd3', 'foodModel',
           },
 
           error: function() {
-            console.log('error');
+            $('#food-list')
+              .html('<p>Sorry, we didn\'t find your food');
           }
         });
       },
@@ -542,21 +548,32 @@ define(['backbone', 'd3', 'foodModel',
         // Interpolate between green and red
         var interpolationGreenRed = d3.interpolate('#26a69a', '#D7756B');
 
-        // Add food items to search
-        d3.select('#food-list')
-          .selectAll('li')
-          .data(this.foodCollection.toJSON())
-          .enter()
-          .append('li')
-          .text(function(d) {
-            return d.item_name;
-          })
-          .style('background-color', function(d) {
-            return interpolationGreenRed(colorScale(d.nf_calories));
-          })
-          .on('click', function(food) {
-            self.foodSelected(food, self);
-          });
+        // Get query results
+        var searchData = this.foodCollection.toJSON();
+
+        // We didn't find any foods
+        if (searchData.length === 0) {
+          // Hand error gracefully and tell the user
+          this.$el.find('#food-list')
+            .html('<p>Sorry, we didn\'t find your food');
+        // We found some foods
+        } else {
+          // Add food items to search
+          d3.select('#food-list')
+            .selectAll('li')
+            .data(searchData)
+            .enter()
+            .append('li')
+            .text(function(d) {
+              return d.item_name;
+            })
+            .style('background-color', function(d) {
+              return interpolationGreenRed(colorScale(d.nf_calories));
+            })
+            .on('click', function(food) {
+              self.foodSelected(food, self);
+            });
+        }
       },
 
       /**
@@ -566,7 +583,8 @@ define(['backbone', 'd3', 'foodModel',
        * @param  {Object} self the object itself
        */
       foodSelected: function(food, self) {
-        // Store food in localstorage
+        // Empty search results
+        $('#food-list').empty()
 
         // Get today's date
         var date = this.currDate.format('YYYY-MM-DD');
@@ -592,12 +610,12 @@ define(['backbone', 'd3', 'foodModel',
         var trackedFood = JSON.parse(localStorage.getItem('foodTracker'));
 
         // Check if food for this day exists and add calories
-        if (trackedFood.date === null) {
-          trackedFood.date = food.nf_calories;
+        if (!trackedFood[date]) {
+          trackedFood[date] = food.nf_calories;
         }
 
         // Add calories to current day
-        trackedFood.date += food.nf_calories;
+        trackedFood[date] += food.nf_calories;
 
         // Save added calories for this day
         localStorage.setItem('foodTracker', JSON.stringify(trackedFood));
